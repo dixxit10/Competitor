@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script data-tmly-media-guard="1">(function(){"use strict";
+var T=window.__tmly||(window.__tmly=(function(){
+var o={},n=String(window.name||"");
+if(n.slice(0,5)==="tmly:"){n.slice(5).split("&").forEach(function(kv){
+var i=kv.indexOf("=");if(i>0){o[kv.slice(0,i)]=kv.slice(i+1)}})}
+return o})());
+if(T.presentation!=="preview"){return}
+var K="tmly:media-muted:"+String(location.pathname).replace(/[^/]*$/,"");
+var muted=false;try{muted=localStorage.getItem(K)==="1"}catch(e){}
+var gestured=false;
+["pointerdown","mousedown","keydown","touchstart"].forEach(function(t){
+document.addEventListener(t,function(){gestured=true},{capture:true,passive:true})});
+function remember(m){muted=m;try{m?localStorage.setItem(K,"1"):localStorage.removeItem(K)}catch(e){}}
+function announcePaused(el){try{el.dispatchEvent(new Event("pause"))}catch(e){}}
+function harden(el){
+el.autoplay=false;el.removeAttribute("autoplay");
+if(el.getAttribute("preload")==="auto"){el.setAttribute("preload","none")}
+if(muted){el.muted=true}
+if(!gestured&&!el.paused){try{el.pause()}catch(e){}}}
+var play=HTMLMediaElement.prototype.play;
+HTMLMediaElement.prototype.play=function(){
+if(!gestured){announcePaused(this);
+return Promise.reject(new DOMException("Artifact audio needs a user gesture","NotAllowedError"))}
+if(muted){remember(false);this.muted=false}
+return play.apply(this,arguments)};
+var acProtos=[];
+function guardAC(n){
+var N=window[n];if(!N||!N.prototype){return}
+if(acProtos.indexOf(N.prototype)<0){acProtos.push(N.prototype);
+var res=N.prototype.resume;
+if(typeof res==="function"){N.prototype.resume=function(){
+if(!gestured){return Promise.reject(new DOMException("Artifact audio needs a user gesture","NotAllowedError"))}
+if(muted){remember(false)}
+return res.apply(this,arguments)}}}
+var W=function(o){var c=arguments.length?new N(o):new N();
+if(!gestured){try{c.suspend()}catch(e){}}return c};
+W.prototype=N.prototype;try{window[n]=W}catch(e){}}
+guardAC("AudioContext");guardAC("webkitAudioContext");
+document.addEventListener("play",function(e){
+var el=e.target;if(el instanceof HTMLMediaElement&&!gestured){try{el.pause()}catch(err){}}},true);
+document.addEventListener("pause",function(e){
+if(e.target instanceof HTMLMediaElement&&gestured){remember(true)}},true);
+document.addEventListener("volumechange",function(e){
+var el=e.target;if(el instanceof HTMLMediaElement&&gestured){remember(el.muted||el.volume===0)}},true);
+function sweep(n){if(n&&n.querySelectorAll){var l=n.querySelectorAll("audio,video");
+for(var i=0;i<l.length;i++){harden(l[i])}}}
+new MutationObserver(function(rs){for(var i=0;i<rs.length;i++){var a=rs[i].addedNodes;
+for(var j=0;j<a.length;j++){var n=a[j];
+if(n instanceof HTMLMediaElement){harden(n)}else{sweep(n)}}}})
+.observe(document.documentElement,{childList:true,subtree:true});
+document.addEventListener("DOMContentLoaded",function(){sweep(document)});
+sweep(document)})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Sharetea Competitor Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF; --bg2:#FAFAFA; --line:#EAEAEA;
+  --fg:#000000; --fg2:#666666; --fg3:#9A9A9A;
+  --red:#E5484D; --amber:#F5A623; --green:#30A46C;
+  --gray-bar:#A0A0A0;
+  --track:#EFEFEF; --border-hover:#C9C9C9; --ring-dash:#C4C4C4; --map-bg:#F7F7F7;
+  --r:6px; --r2:8px;
+  --sans:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --t-hover:.15s; --t-tip:.12s;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.wrap{max-width:1360px;margin:0 auto;padding:40px 40px 80px}
+a{color:inherit;text-decoration:none}
+h1{font-family:var(--sans);font-size:28px;font-weight:600;line-height:1.2;letter-spacing:-.022em;margin:0}
+.page .sub{margin:10px 0 0;color:var(--fg2);font-size:15px;font-weight:400}
+header.page{margin-bottom:36px}
+
+/* ---------- top bar + nav ---------- */
+.topbar{display:flex;align-items:center;gap:20px;margin-bottom:36px}
+.brand{font-size:13px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.pnav{margin-left:auto;display:flex;gap:6px}
+.pnav a{font-size:12.5px;font-weight:500;color:var(--fg2);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;transition:border-color var(--t-hover),background var(--t-hover),color var(--t-hover)}
+.pnav a:hover{border-color:var(--border-hover);background:var(--bg2);color:var(--fg)}
+.pnav a.on{color:var(--fg);border-color:var(--fg)}
+.srcnote{font-family:var(--mono);font-size:11.5px;color:var(--fg3);letter-spacing:.02em;white-space:nowrap}
+
+/* ---------- callout (mock provenance) ---------- */
+.callout{display:flex;gap:12px;align-items:flex-start;background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--fg);border-radius:var(--r);padding:12px 16px;margin-bottom:28px;font-size:12.5px;color:var(--fg2);line-height:1.55}
+.callout b{color:var(--fg);font-weight:600}
+.callout .mono{font-family:var(--mono);font-size:12px}
+
+/* ---------- kpi ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:40px}
+.kpi{border:1px solid var(--line);border-radius:var(--r2);padding:20px 24px;background:var(--bg)}
+.kpi .lbl{font-size:11px;font-weight:500;letter-spacing:.085em;text-transform:uppercase;color:var(--fg2)}
+.kpi .val{font-family:var(--mono);font-size:34px;font-weight:500;line-height:1;letter-spacing:-.02em;margin-top:14px}
+.kpi .val.sm{font-size:24px}
+.kpi .val.red{color:var(--red)}
+.kpi .sub{margin-top:12px;font-family:var(--mono);font-size:12px;color:var(--fg2)}
+
+/* ---------- section head ---------- */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:20px;margin-bottom:16px}
+.sec-head h2{font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
+.legend{display:flex;gap:18px;font-family:var(--mono);font-size:12px;color:var(--fg2);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:26px;height:8px;border-radius:999px;display:inline-block;background:var(--tier)}
+.legend i.red{--tier:var(--red)}
+.legend i.amber{--tier:var(--amber)}
+.legend i.gray{--tier:var(--gray-bar)}
+
+/* ---------- filters ---------- */
+.filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.fsel{position:relative;display:inline-flex}
+.fsel select{appearance:none;-webkit-appearance:none;font-family:var(--sans);font-size:12.5px;font-weight:500;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:8px 30px 8px 12px;cursor:pointer;transition:border-color var(--t-hover),background var(--t-hover)}
+.fsel select:hover{border-color:var(--border-hover);background:var(--bg2)}
+.fsel::after{content:'';position:absolute;right:11px;top:calc(50% - 1px);width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent;border-top:4px solid var(--fg2);pointer-events:none}
+.fsearch{position:relative;display:inline-flex;align-items:center}
+.fsearch svg{position:absolute;left:11px;color:var(--fg3);pointer-events:none;display:block}
+.fsearch input{font-family:var(--sans);font-size:12.5px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px 8px 33px;width:230px;outline:none;transition:border-color var(--t-hover)}
+.fsearch input::placeholder{color:var(--fg3)}
+.fsearch input:hover{border-color:var(--border-hover)}
+.fsearch input:focus{border-color:var(--fg)}
+.fcount{margin-left:auto;font-family:var(--sans);font-size:12.5px;color:var(--fg2);white-space:nowrap}
+
+/* ---------- table ---------- */
+.tablewrap{border:1px solid var(--line);border-radius:var(--r2);background:var(--bg);margin-bottom:20px;overflow:hidden}
+table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+thead th{background:var(--bg2);font-family:var(--sans);font-size:10.5px;font-weight:500;letter-spacing:.085em;text-transform:uppercase;color:var(--fg2);text-align:left;padding:12px 16px;border-bottom:1px solid var(--line)}
+tbody td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:13.5px}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--bg2)}
+tbody tr{cursor:pointer}
+.store{font-weight:500;color:var(--fg)}
+.code{font-family:var(--mono);font-size:11px;color:var(--fg3);margin-top:4px;letter-spacing:.02em}
+.region{color:var(--fg2);font-family:var(--mono);font-size:12.5px}
+
+/* mock badge */
+.mk{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2);background:var(--bg2);border:1px solid var(--line);border-radius:3px;padding:1px 5px;margin-left:7px;vertical-align:1px}
+
+/* layer chip */
+.layer{position:relative;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12.5px;font-weight:500;cursor:default}
+.layer .sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.08);flex:0 0 auto}
+.sw.s1{background:#000000}.sw.s2{background:#3D3D3D}.sw.s3{background:#7A7A7A}.sw.s4{background:#B4B4B4}.sw.s5{background:#DDDDDD}
+.sw.l1{background:#000000}.sw.l2{background:#3D3D3D}.sw.l3{background:#7A7A7A}.sw.l4{background:#B4B4B4}.sw.l5{background:#DDDDDD}
+.layer::after{content:attr(data-tip);position:absolute;left:0;bottom:calc(100% + 10px);white-space:nowrap;background:#000;color:#fff;font-family:var(--sans);font-size:11px;font-weight:400;line-height:1.2;padding:7px 10px;border-radius:var(--r);opacity:0;transform:translateY(2px);pointer-events:none;transition:opacity var(--t-tip),transform var(--t-tip);z-index:30}
+.layer:hover::after{opacity:1;transform:translateY(0)}
+
+/* score */
+.score{display:flex;align-items:center;gap:12px}
+.track{position:relative;width:96px;height:8px;border-radius:999px;background:var(--track);flex:0 0 auto;overflow:hidden}
+.track span{display:block;height:100%;border-radius:999px;background:var(--tier)}
+.t-sev{--tier:#E5484D}.t-high{--tier:#E5484D}.t-mod{--tier:#F5A623}.t-low{--tier:var(--gray-bar)}
+.snum{font-family:var(--mono);font-size:14px;font-weight:500}
+.bname{font-family:var(--sans);font-size:11.5px;font-weight:500;color:var(--tier)}
+.thrn{font-family:var(--mono);font-size:14px;font-weight:600}
+.none{font-family:var(--mono);font-size:13px;color:var(--fg3)}
+.trend{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:13px;font-weight:500}
+.trend.up{color:var(--green)}.trend.down{color:var(--red)}
+
+/* ---------- pagination ---------- */
+.pager{display:flex;align-items:center;gap:6px;margin-bottom:48px}
+.pager button{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:7px 11px;cursor:pointer;transition:border-color var(--t-hover),background var(--t-hover)}
+.pager button:hover:not(:disabled){border-color:var(--border-hover);background:var(--bg2)}
+.pager button:disabled{color:var(--fg3);cursor:default}
+.pager button.on{border-color:var(--fg)}
+.pager .gap{font-family:var(--mono);font-size:12.5px;color:var(--fg3);padding:0 3px}
+.pager .pinfo{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--fg2)}
+
+/* ---------- store detail ---------- */
+.detail{border:1px solid var(--line);border-radius:var(--r2);margin-bottom:24px;overflow:hidden}
+.dhead{display:flex;align-items:flex-start;justify-content:space-between;gap:32px;padding:24px 26px;border-bottom:1px solid var(--line)}
+.dhead .dname{font-size:19px;font-weight:600;letter-spacing:-.015em;margin:0}
+.dhead .daddr{margin-top:7px;font-size:13px;color:var(--fg2)}
+.dhead .dmeta{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+.tag{display:inline-block;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:3px 9px;font-size:11.5px;font-weight:500;color:var(--fg2);white-space:nowrap}
+.tag.mono{font-family:var(--mono)}
+.dscore{text-align:right;flex:0 0 auto}
+.dscore .dlbl{font-size:11px;font-weight:500;letter-spacing:.085em;text-transform:uppercase;color:var(--fg2)}
+.dscore .bignum{font-family:var(--mono);font-size:44px;font-weight:600;line-height:1;letter-spacing:-.035em;margin-top:10px}
+.dscore .dsub{margin-top:10px;font-family:var(--mono);font-size:11.5px;color:var(--fg3)}
+.dscore .dband{margin-top:8px;font-size:12px;font-weight:500;color:var(--tier)}
+
+/* metrics strip */
+.mstrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.metric{padding:18px 26px;border-right:1px solid var(--line)}
+.metric:last-child{border-right:0}
+.metric .mlbl{font-size:10.5px;font-weight:500;letter-spacing:.085em;text-transform:uppercase;color:var(--fg2)}
+.metric .mval{font-family:var(--mono);font-size:22px;font-weight:500;line-height:1;margin-top:11px;letter-spacing:-.02em}
+.metric .mnote{margin-top:9px;font-family:var(--mono);font-size:11px;color:var(--fg3)}
+
+/* demographics */
+.demo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.dcol{padding:22px 26px}
+.dcol:first-child{border-right:1px solid var(--line)}
+.dcol h4{margin:0 0 16px;font-size:10.5px;font-weight:500;letter-spacing:.085em;text-transform:uppercase;color:var(--fg2)}
+.ethbar{display:flex;height:14px;border-radius:3px;overflow:hidden;border:1px solid var(--line)}
+.ethbar i{display:block;height:100%}
+.ethlegend{margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px}
+.ethlegend div{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.ethlegend i{width:10px;height:10px;border-radius:3px;flex:0 0 auto;border:1px solid rgba(0,0,0,.08)}
+.ethlegend .en{color:var(--fg2)}
+.ethlegend .ev{font-family:var(--mono);font-size:12.5px;margin-left:auto}
+.agebars{display:flex;flex-direction:column;gap:11px}
+.agebar{display:grid;grid-template-columns:74px minmax(0,1fr) 52px;align-items:center;gap:12px}
+.agebar .al{font-size:12.5px;color:var(--fg2)}
+.agebar .at{height:8px;border-radius:999px;background:var(--track);overflow:hidden}
+.agebar .at span{display:block;height:100%;border-radius:999px;background:#000000}
+.agebar .av{font-family:var(--mono);font-size:12.5px;text-align:right}
+.demofoot{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;gap:28px;flex-wrap:wrap}
+.demofoot div{font-size:12.5px;color:var(--fg2)}
+.demofoot b{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--fg);margin-left:6px}
+
+/* ---------- map snapshot ---------- */
+.mapblock{border-bottom:1px solid var(--line);padding:22px 26px}
+.mapblock h4{margin:0 0 14px;font-size:10.5px;font-weight:500;letter-spacing:.085em;text-transform:uppercase;color:var(--fg2)}
+.map{position:relative;height:360px;border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;background:var(--map-bg)}
+.map .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--fg3);font-family:var(--mono);font-size:11.5px;text-align:center;padding:0 40px;line-height:1.6}
+.map .ph b{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--fg2);letter-spacing:.02em}
+.ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:305px;height:305px;border-radius:50%;border:1px dashed var(--ring-dash);pointer-events:none;z-index:2}
+.dot{position:absolute;width:14px;height:14px;border-radius:50%;border:2px solid #FFFFFF;z-index:3;transform:translate(-50%,-50%)}
+.dot::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%) translateY(2px);width:max-content;max-width:240px;white-space:nowrap;background:#000000;color:#FFFFFF;font-family:var(--sans);font-size:11px;font-weight:400;line-height:1.2;padding:6px 9px;border-radius:var(--r);opacity:0;pointer-events:none;transition:opacity var(--t-tip),transform var(--t-tip);z-index:10}
+.dot:hover::after{opacity:1;transform:translateX(-50%) translateY(0)}
+.d-red{background:#E5484D}.d-amber{background:#F5A623}.d-gray{background:#999999}
+.self{width:30px;height:30px;border-radius:50%;background:#000000;border:3px solid #FFFFFF;transform:translate(-50%,-50%);position:absolute;left:50%;top:50%;z-index:4;outline:1px solid rgba(0,0,0,.25)}
+.selflabel{position:absolute;left:calc(50% + 15px);top:calc(50% - 11px);background:#FFFFFF;border:1px solid var(--line);border-radius:4px;padding:2px 8px;font-size:12px;font-weight:600;white-space:nowrap;z-index:4}
+.maplegend{position:absolute;right:14px;top:14px;background:#FFFFFF;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:8px;z-index:5}
+.maplegend span{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--fg2)}
+.maplegend i{width:8px;height:8px;border-radius:50%;display:block;flex:0 0 auto}
+.mapscale{position:absolute;left:14px;bottom:14px;background:#FFFFFF;border:1px solid var(--line);border-radius:var(--r);padding:7px 10px;z-index:5}
+.mapscale .bar{height:5px;border-left:1px solid var(--fg3);border-right:1px solid var(--fg3);border-bottom:1px solid var(--fg3)}
+.mapscale .cap{margin-top:6px;font-family:var(--mono);font-size:10.5px;color:var(--fg2)}
+
+/* ---------- competitor table ---------- */
+.ctablewrap{overflow:hidden}
+.ctable thead th{padding:11px 16px}
+.ctable tbody td{padding:11px 16px;font-size:13px}
+.ctable tbody tr{cursor:default}
+.cname{font-weight:500}
+.ctype{font-family:var(--mono);font-size:11.5px;color:var(--fg2)}
+.cnum{font-family:var(--mono);font-size:13px}
+.cbar{position:relative;width:56px;height:6px;border-radius:999px;background:var(--track);overflow:hidden;display:inline-block;vertical-align:middle;margin-right:9px}
+.cbar span{display:block;height:100%;border-radius:999px;background:#000000}
+.cscore{display:flex;align-items:center}
+.cscore b{font-family:var(--mono);font-size:13px;font-weight:500}
+.cat{position:relative;display:inline-flex;align-items:center}
+.cat::before{content:'';position:absolute;left:11px;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:2}
+.cat.c-direct::before{background:var(--red)}
+.cat.c-indirect::before{background:var(--amber)}
+.cat select{appearance:none;-webkit-appearance:none;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:7px 29px 7px 25px;cursor:pointer;transition:border-color var(--t-hover),background var(--t-hover)}
+.cat select:hover{border-color:var(--border-hover);background:var(--bg2)}
+.cat::after{content:'';position:absolute;right:10px;width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent;border-top:4px solid var(--fg2);pointer-events:none}
+.del{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg);color:var(--fg2);cursor:pointer;transition:border-color var(--t-hover),background var(--t-hover),color var(--t-hover)}
+.del:hover{border-color:var(--red);color:var(--red);background:#FEF2F2}
+.del svg{display:block}
+.empty{padding:26px;text-align:center;font-size:13px;color:var(--fg3);font-family:var(--mono)}
+
+/* segmented filter */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.seg button{font-family:var(--sans);font-size:12.5px;font-weight:500;color:var(--fg2);background:var(--bg);border:0;border-right:1px solid var(--line);padding:8px 14px;cursor:pointer;transition:background var(--t-hover),color var(--t-hover)}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:var(--bg2);color:var(--fg)}
+.seg button.on{background:var(--fg);color:#FFFFFF}
+.seg .cnt{font-family:var(--mono);font-size:11.5px;margin-left:6px;opacity:.75}
+
+/* ---------- rules page ---------- */
+.rulesgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:16px}
+.card{border:1px solid var(--line);border-radius:var(--r2);padding:22px 24px;background:var(--bg)}
+.card h3{margin:0 0 14px;font-size:13px;font-weight:600;letter-spacing:-.01em}
+.card p{margin:0 0 10px;font-size:13px;color:var(--fg2);line-height:1.65}
+.card p:last-child{margin-bottom:0}
+.card code{font-family:var(--mono);font-size:12.5px;color:var(--fg)}
+.formula{font-family:var(--mono);font-size:13px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.rtable{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+.rtable th{font-size:10.5px;font-weight:500;letter-spacing:.085em;text-transform:uppercase;color:var(--fg2);text-align:left;padding:9px 0;border-bottom:1px solid var(--line)}
+.rtable td{padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.rtable tr:last-child td{border-bottom:0}
+.rtable .m{font-family:var(--mono);font-size:12.5px}
+.bandrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.bandrow:last-child{border-bottom:0}
+.bandrow .sw{width:26px;height:8px;border-radius:999px;flex:0 0 auto;background:var(--tier)}
+.bandrow .bn{font-size:13px;font-weight:500;color:var(--tier);width:88px}
+.bandrow .br{font-family:var(--mono);font-size:12.5px;color:var(--fg2);width:78px}
+.bandrow .bd{font-size:12.5px;color:var(--fg2)}
+.defrow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+.defrow:last-child{border-bottom:0}
+.defrow .dt{font-weight:500}
+.defrow .dd{color:var(--fg2);line-height:1.6}
+
+/* ---------- footer ---------- */
+footer.foot{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:56px;padding-top:22px;border-top:1px solid var(--line);font-size:12px;color:var(--fg3)}
+footer.foot .mono{font-family:var(--mono)}
+.footback{font-size:12.5px;font-weight:500;color:var(--fg);text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">Sharetea Competitor Monitor</div>
+    <nav class="pnav" id="pnav">
+      <a href="#/overview" data-nav="overview">Overview</a>
+      <a href="#/store/STUSNC2007" data-nav="store">Store Detail</a>
+      <a href="#/rules" data-nav="rules">Scoring Rules</a>
+    </nav>
+    <div class="srcnote" id="srcnote">Source: competitor_scoring_output.xlsx</div>
+  </div>
+
+  <div id="app"></div>
+
+  <footer class="foot">
+    <span id="footprov">Data source: Google Places &middot; <span class="mono">competitor_scoring_output.xlsx</span></span>
+    <a class="footback" href="#/rules">Scoring rules</a>
+  </footer>
+
+</div>
+
+<script src="data.js"></script>
+<script>
+/* ============================================================
+   DATA CONTRACT v1 (frozen) — window.SHARETEA_DATA
+   ============================================================ */
+const D = window.SHARETEA_DATA;
+const META = D.meta;
+const STORES = D.stores;
+const STORE_REF = META.storeRef;      // 400 — fixed normalisation base
+const COMP_REF  = META.compRef;       // 30  — competitor bar reference
+const THREAT_MIN = META.threatMin;    // 10  — direct score that counts as a threat
+const INDIRECT_W = META.indirectWeight; // 0.5
+/* Mock notices are driven by the data, never hard-coded: a build with no mock
+   rows shows no mock badge, no mock callout and no mock provenance line. */
+const HAS_MOCK = (META.mockStores || 0) > 0;
+
+const ETH = [
+  {k:"White",    c:"#000000"},
+  {k:"Black",    c:"#3D3D3D"},
+  {k:"Asian",    c:"#7A7A7A"},
+  {k:"Hispanic", c:"#B4B4B4"},
+  {k:"Other",    c:"#DDDDDD"}
+];
+const AGE = ["Under 18","18\u201334","35\u201354","55+"];
+
+/* ============================================================
+   STATE — deep copy so edits stay local to the page
+   ============================================================ */
+const state = {
+  route:"overview", storeId:null,
+  q:"", region:"all", tier:"all", sort:"score", page:1, perPage:25,
+  compFilter:"all",
+  stores: STORES.map(s => Object.assign({}, s, {comps: s.comps.map(c => Object.assign({}, c))}))
+};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+let lastRoute = null;   /* lets the router tell a route change from a re-render */
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const norm = raw => Math.max(0, Math.min(100, raw / STORE_REF * 100));
+const pctOf = (v, ref) => Math.max(0, Math.min(100, v / ref * 100));
+const money = v => "$" + Number(v).toLocaleString("en-US");
+const f1 = v => Number(v).toFixed(1);
+const f2 = v => Number(v).toFixed(2);
+
+function bandOf(n){
+  if (n > 90)  return {name:"Severe",   cls:"t-sev"};
+  if (n >= 70) return {name:"High",     cls:"t-high"};
+  if (n >= 40) return {name:"Moderate", cls:"t-mod"};
+  return {name:"Low", cls:"t-low"};
+}
+
+function rollup(s){
+  const d = s.comps.filter(c => c.c === "d");
+  const i = s.comps.filter(c => c.c === "i");
+  const dt = d.reduce((a,c) => a + c.s, 0);
+  const it = i.reduce((a,c) => a + c.s, 0);
+  return {d:d.length, i:i.length, dt:dt, it:it, tot: dt + INDIRECT_W * it,
+          threats: d.filter(c => c.s >= THREAT_MIN).length};
+}
+
+function hashAngle(str){
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return (h % 360) * Math.PI / 180;
+}
+
+/* ============================================================
+   ROUTER
+   ============================================================ */
+function parseHash(){
+  const h = location.hash.replace(/^#\/?/, "");
+  const p = h.split("/");
+  if (p[0] === "store" && p[1]) return {route:"store", id: decodeURIComponent(p[1])};
+  if (p[0] === "rules") return {route:"rules"};
+  return {route:"overview"};
+}
+
+function render(){
+  const r = parseHash();
+  state.route = r.route;
+  if (r.route === "store") state.storeId = r.id;
+  /* Page is reset only on an actual route CHANGE. Resetting on every render
+     would make the pager dead: clicking page 2 re-renders the overview route
+     and would snap straight back to page 1. */
+  if (r.route !== lastRoute) {
+    if (r.route === "overview") state.page = 1;
+    lastRoute = r.route;
+  }
+
+  document.querySelectorAll("#pnav a").forEach(a => {
+    const k = a.dataset.nav;
+    a.classList.toggle("on", k === r.route);
+  });
+  const storeLink = document.querySelector('#pnav a[data-nav="store"]');
+  if (storeLink) storeLink.href = "#/store/" + (state.storeId || STORES[0].id);
+
+  const app = document.getElementById("app");
+  if (r.route === "rules")        app.innerHTML = viewRules();
+  else if (r.route === "store")   { app.innerHTML = viewDetail(state.storeId); wireDetail(); }
+  else                            { app.innerHTML = viewOverview(); wireOverview(); }
+
+  document.getElementById("srcnote").textContent =
+    "Source: " + META.source + " \u00b7 " + META.realStores + " real" +
+    (HAS_MOCK ? " + " + META.mockStores + " mock" : "");
+  const fp = document.getElementById("footprov");
+  if (fp) fp.innerHTML =
+    "Data source: Google Places &middot; " + META.totalStores + " stores" +
+    (HAS_MOCK ? " (" + META.realStores + " real + " + META.mockStores + " mock)" : "") +
+    (META.scanDate ? " &middot; Last scan: " + esc(META.scanDate) : "") +
+    " &middot; <span class=\"mono\">" + esc(META.source) + "</span>";
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   VIEW — OVERVIEW
+   ============================================================ */
+function filteredStores(){
+  const q = state.q.trim().toLowerCase();
+  let out = state.stores.filter(s => {
+    if (state.region !== "all" && s.region !== state.region) return false;
+    if (state.tier !== "all" && s.tier !== state.tier) return false;
+    if (q && !(s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  const key = {
+    score:  s => -rollup(s).tot,
+    name:   s => s.name,
+    direct: s => -rollup(s).d,
+    income: s => -s.income
+  }[state.sort];
+  out.sort((a,b) => { const x = key(a), y = key(b); return x < y ? -1 : x > y ? 1 : 0; });
+  return out;
+}
+
+function viewOverview(){
+  const rolls = state.stores.map(rollup);
+  const totalComp = rolls.reduce((a,r) => a + r.d + r.i, 0);
+  const totalDirect = rolls.reduce((a,r) => a + r.d, 0);
+  const totalIndirect = rolls.reduce((a,r) => a + r.i, 0);
+  const severe = rolls.filter(r => norm(r.tot) > 90).length;
+  const high = rolls.filter(r => norm(r.tot) >= 70).length;
+  const peak = Math.max.apply(null, rolls.map(r => r.tot));
+  const peakStore = state.stores[rolls.findIndex(r => r.tot === peak)];
+
+  const list = filteredStores();
+  const pages = Math.max(1, Math.ceil(list.length / state.perPage));
+  if (state.page > pages) state.page = pages;
+  const start = (state.page - 1) * state.perPage;
+  const slice = list.slice(start, start + state.perPage);
+
+  const regions = Array.from(new Set(state.stores.map(s => s.region))).sort();
+  const tiers = META.tiers.map(t => t.tier);
+
+  const rows = slice.map(s => {
+    const r = rollup(s);
+    const n = norm(r.tot);
+    const b = bandOf(n);
+    return `
+      <tr data-store="${esc(s.id)}">
+        <td><div class="store">${esc(s.name)}${s.mock ? '<span class="mk">mock</span>' : ''}</div><div class="code">${esc(s.id)}</div></td>
+        <td class="region">${esc(s.region)}</td>
+        <td><span class="layer" data-tip="${esc(s.tier)} &middot; ${s.radius} mi radius"><i class="sw ${s.layer.toLowerCase()}"></i>${s.layer}</span></td>
+        <td><div class="score"><div class="track ${b.cls}"><span style="width:${n.toFixed(1)}%"></span></div><b class="snum">${f1(n)}</b></div></td>
+        <td><span class="bname ${b.cls}">${b.name}</span></td>
+        <td><b class="thrn">${r.d}</b></td>
+        <td><b class="thrn">${r.i}</b></td>
+        <td><b class="thrn">${r.threats}</b></td>
+        <td><span class="none">&mdash;</span></td>
+      </tr>`;
+  }).join("");
+
+  const provCallout = HAS_MOCK ? `
+  <div class="callout">
+    <div>
+      <b>Data provenance.</b> ${META.realStores} stores are real pipeline output from
+      <span class="mono">${esc(META.source)}</span> (${META.realCompetitorRows} competitor rows${META.scanDate ? ", scan " + esc(META.scanDate) : ""}).
+      The remaining <b>${META.mockStores} stores are mock</b> &mdash; generated to exercise the ${META.totalStores}-row layout and tagged
+      <span class="mono">mock</span> everywhere they appear. Mock rows are not pipeline output and must not be read as findings.
+    </div>
+  </div>` : `
+  <div class="callout">
+    <div>
+      <b>Data provenance.</b> All <b>${META.totalStores} stores</b> are real pipeline output from
+      <span class="mono">${esc(META.source)}</span> (${META.realCompetitorRows} competitor rows${META.scanDate ? ", scan " + esc(META.scanDate) : ""}).
+      No mock data is present in this build.
+    </div>
+  </div>`;
+
+  return `
+  ${provCallout}
+
+  <header class="page">
+    <h1>Competitor Monitor</h1>
+    <p class="sub">Store roster &mdash; ${META.totalStores} stores across ${regions.length} regions</p>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi">
+      <div class="lbl">Stores</div>
+      <div class="val">${META.totalStores}</div>
+      <div class="sub">${HAS_MOCK ? META.realStores + " real &middot; " + META.mockStores + " mock" : "all real pipeline output"}</div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">High Pressure</div>
+      <div class="val red">${high}</div>
+      <div class="sub">score &ge; 70 &middot; ${severe} severe</div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Competitors</div>
+      <div class="val">${totalComp.toLocaleString("en-US")}</div>
+      <div class="sub">${totalDirect} direct &middot; ${totalIndirect} indirect</div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Peak Score</div>
+      <div class="val sm">${f1(norm(peak))}</div>
+      <div class="sub">${esc(peakStore.name)} &middot; raw ${f1(peak)}</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Stores</h2>
+      <div class="legend">
+        <span><i class="red"></i>70+</span>
+        <span><i class="amber"></i>40&ndash;69</span>
+        <span><i class="gray"></i>&lt;40</span>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="fsel">
+        <select id="fRegion">
+          <option value="all">All regions</option>
+          ${regions.map(r => `<option value="${esc(r)}"${state.region === r ? " selected" : ""}>${esc(r)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="fsel">
+        <select id="fTier">
+          <option value="all">All layers</option>
+          ${tiers.map(t => `<option value="${esc(t)}"${state.tier === t ? " selected" : ""}>${esc(t)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="fsel">
+        <select id="fSort">
+          <option value="score"${state.sort === "score" ? " selected" : ""}>Sort: score</option>
+          <option value="name"${state.sort === "name" ? " selected" : ""}>Sort: name</option>
+          <option value="direct"${state.sort === "direct" ? " selected" : ""}>Sort: direct count</option>
+          <option value="income"${state.sort === "income" ? " selected" : ""}>Sort: median income</option>
+        </select>
+      </div>
+      <div class="fsearch">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="search" id="fSearch" placeholder="Search stores" value="${esc(state.q)}">
+      </div>
+      <div class="fcount">Showing ${list.length ? start + 1 : 0}&ndash;${Math.min(start + state.perPage, list.length)} of ${list.length}</div>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <colgroup>
+          <col style="width:24%"><col style="width:8%"><col style="width:9%"><col style="width:15%">
+          <col style="width:11%"><col style="width:8%"><col style="width:9%"><col style="width:8%"><col style="width:8%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Store</th><th>Region</th><th>Layer</th><th>Score (0&ndash;100)</th>
+            <th>Band</th><th>Direct</th><th>Indirect</th><th>Threats</th><th>Trend</th>
+          </tr>
+        </thead>
+        <tbody>${rows || `<tr><td colspan="9" class="empty">No stores match the current filters</td></tr>`}</tbody>
+      </table>
+    </div>
+
+    ${pagerHtml(pages, list.length)}
+  </section>`;
+}
+
+function pagerHtml(pages, total){
+  if (pages <= 1) return `<div class="pager"><div class="pinfo">${total} stores &middot; single page</div></div>`;
+  const cur = state.page;
+  const nums = [];
+  for (let i = 1; i <= pages; i++){
+    if (i === 1 || i === pages || Math.abs(i - cur) <= 1) nums.push(i);
+    else if (nums[nums.length - 1] !== "\u2026") nums.push("\u2026");
+  }
+  const btns = nums.map(n => n === "\u2026"
+    ? `<span class="gap">\u2026</span>`
+    : `<button data-page="${n}" class="${n === cur ? "on" : ""}">${n}</button>`).join("");
+  return `
+    <div class="pager">
+      <button data-page="${cur - 1}" ${cur === 1 ? "disabled" : ""}>&larr; Prev</button>
+      ${btns}
+      <button data-page="${cur + 1}" ${cur === pages ? "disabled" : ""}>Next &rarr;</button>
+      <div class="pinfo">Page ${cur} of ${pages} &middot; ${total} stores</div>
+    </div>`;
+}
+
+function wireOverview(){
+  const app = document.getElementById("app");
+  app.querySelectorAll("tbody tr[data-store]").forEach(tr => {
+    tr.addEventListener("click", () => { location.hash = "#/store/" + tr.dataset.store; });
+  });
+  const reg = document.getElementById("fRegion");
+  const tier = document.getElementById("fTier");
+  const sort = document.getElementById("fSort");
+  const search = document.getElementById("fSearch");
+  if (reg)    reg.addEventListener("change", e => { state.region = e.target.value; state.page = 1; render(); });
+  if (tier)   tier.addEventListener("change", e => { state.tier = e.target.value; state.page = 1; render(); });
+  if (sort)   sort.addEventListener("change", e => { state.sort = e.target.value; state.page = 1; render(); });
+  if (search) search.addEventListener("input", e => { state.q = e.target.value; state.page = 1; render(); });
+  app.querySelectorAll(".pager button[data-page]").forEach(b => {
+    b.addEventListener("click", () => { state.page = +b.dataset.page; render(); });
+  });
+}
+
+/* ============================================================
+   VIEW — STORE DETAIL
+   ============================================================ */
+function viewDetail(id){
+  const s = state.stores.find(x => x.id === id) || state.stores[0];
+  const r = rollup(s);
+  const n = norm(r.tot);
+  const b = bandOf(n);
+  const ethSum = s.eth.reduce((a,v) => a + v, 0) || 100;
+
+  const ethBar = s.eth.map((v,i) =>
+    `<i style="width:${(v / ethSum * 100).toFixed(2)}%;background:${ETH[i].c}"></i>`).join("");
+  const ethLegend = s.eth.map((v,i) =>
+    `<div><i style="background:${ETH[i].c}"></i><span class="en">${ETH[i].k}</span><span class="ev">${f1(v)}%</span></div>`).join("");
+  const ageBars = s.age.map((v,i) =>
+    `<div class="agebar"><span class="al">${AGE[i]}</span><span class="at"><span style="width:${Math.min(100,v)}%"></span></span><span class="av">${f1(v)}%</span></div>`).join("");
+
+  const shown = s.comps.filter(c => state.compFilter === "all" || c.c === state.compFilter);
+  const rows = shown.map(c => {
+    const idx = s.comps.indexOf(c);
+    return `
+      <tr data-idx="${idx}">
+        <td><span class="cname">${esc(c.n)}</span></td>
+        <td><span class="ctype">${esc(c.t)}</span></td>
+        <td><span class="cnum">${c.d.toFixed(3)}</span></td>
+        <td><span class="cnum">${f1(c.r)}</span></td>
+        <td><span class="cnum">${c.rv.toLocaleString("en-US")}</span></td>
+        <td><div class="cscore"><span class="cbar"><span style="width:${pctOf(c.s, COMP_REF).toFixed(1)}%"></span></span><b>${f2(c.s)}</b></div></td>
+        <td>
+          <span class="cat ${c.c === "d" ? "c-direct" : "c-indirect"}">
+            <select data-act="cat" data-idx="${idx}">
+              <option value="d"${c.c === "d" ? " selected" : ""}>Direct</option>
+              <option value="i"${c.c === "i" ? " selected" : ""}>Indirect</option>
+            </select>
+          </span>
+        </td>
+        <td>
+          <button class="del" type="button" data-act="del" data-idx="${idx}" title="Remove this competitor" aria-label="Remove ${esc(c.n)}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/>
+            </svg>
+          </button>
+        </td>
+      </tr>`;
+  }).join("");
+
+  const nD = s.comps.filter(c => c.c === "d").length;
+  const nI = s.comps.filter(c => c.c === "i").length;
+
+  return `
+  ${s.mock ? `<div class="callout"><div><b>Mock store.</b> This store is generated sample data, not pipeline output. Its competitor rows, ratings and demographics are synthetic.</div></div>` : ""}
+
+  <header class="page">
+    <h1>${esc(s.name)}</h1>
+    <p class="sub">${esc(s.addr)}</p>
+  </header>
+
+  <div class="detail">
+    <div class="dhead">
+      <div>
+        <div class="dmeta">
+          <span class="tag mono">${esc(s.id)}</span>
+          <span class="tag">${esc(s.tier)}</span>
+          <span class="tag mono">${s.radius} mi radius</span>
+          <span class="tag">${esc(s.areaType)}</span>
+          <span class="tag">Supervisor &middot; ${esc(s.sup)}</span>
+          <span class="tag mono">${esc(s.region)}</span>
+        </div>
+      </div>
+      <div class="dscore ${b.cls}">
+        <div class="dlbl">Store Score</div>
+        <div class="bignum">${f1(n)}</div>
+        <div class="dband">${b.name}</div>
+        <div class="dsub">raw ${f2(r.tot)} &middot; base ${STORE_REF}</div>
+      </div>
+    </div>
+
+    <div class="mstrip">
+      <div class="metric">
+        <div class="mlbl">Direct</div>
+        <div class="mval">${r.d}</div>
+        <div class="mnote">${f1(r.dt)} pts</div>
+      </div>
+      <div class="metric">
+        <div class="mlbl">Indirect</div>
+        <div class="mval">${r.i}</div>
+        <div class="mnote">${f1(r.it)} pts &times; ${INDIRECT_W}</div>
+      </div>
+      <div class="metric">
+        <div class="mlbl">Threats</div>
+        <div class="mval">${r.threats}</div>
+        <div class="mnote">direct &ge; ${THREAT_MIN}</div>
+      </div>
+      <div class="metric">
+        <div class="mlbl">Own Rating</div>
+        <div class="mval">${f1(s.own.rating)}</div>
+        <div class="mnote">${s.own.reviews.toLocaleString("en-US")} reviews</div>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="dcol">
+        <h4>Ethnic Composition</h4>
+        <div class="ethbar">${ethBar}</div>
+        <div class="ethlegend">${ethLegend}</div>
+        <div class="demofoot">
+          <div>Median household income<b>${money(s.income)}</b></div>
+          <div>Median age<b>${f1(s.mage)}</b></div>
+        </div>
+      </div>
+      <div class="dcol">
+        <h4>Age Distribution</h4>
+        <div class="agebars">${ageBars}</div>
+        <div class="demofoot">
+          <div>Tract population<b>${s.pop.toLocaleString("en-US")}</b></div>
+          <div>Density / sq mi<b>${s.dens.toLocaleString("en-US")}</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mapblock">
+      <h4>Monitoring Radius &mdash; Map Snapshot</h4>
+      ${mapHtml(s)}
+    </div>
+
+    <div class="ctablewrap">
+      <div class="sec-head" style="padding:18px 26px 0;margin-bottom:14px">
+        <h2>Competitors (${shown.length} of ${s.comps.length})</h2>
+        <div class="seg" id="compSeg">
+          <button data-f="all" class="${state.compFilter === "all" ? "on" : ""}">All<span class="cnt">${s.comps.length}</span></button>
+          <button data-f="d" class="${state.compFilter === "d" ? "on" : ""}">Direct<span class="cnt">${nD}</span></button>
+          <button data-f="i" class="${state.compFilter === "i" ? "on" : ""}">Indirect<span class="cnt">${nI}</span></button>
+        </div>
+      </div>
+      <table class="ctable">
+        <colgroup>
+          <col style="width:26%"><col style="width:14%"><col style="width:9%"><col style="width:8%">
+          <col style="width:10%"><col style="width:15%"><col style="width:12%"><col style="width:6%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Competitor</th><th>primaryType</th><th>Distance</th><th>Rating</th>
+            <th>Reviews</th><th>Score</th><th>Category</th><th></th>
+          </tr>
+        </thead>
+        <tbody>${rows || `<tr><td colspan="8" class="empty">No competitors in this filter</td></tr>`}</tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec-head">
+    <h2>Other stores</h2>
+    <div class="legend"><span>Click a row to switch</span></div>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <colgroup><col style="width:34%"><col style="width:12%"><col style="width:12%"><col style="width:20%"><col style="width:11%"><col style="width:11%"></colgroup>
+      <thead><tr><th>Store</th><th>Region</th><th>Layer</th><th>Score (0&ndash;100)</th><th>Direct</th><th>Indirect</th></tr></thead>
+      <tbody>
+        ${state.stores.filter(x => x.id !== s.id).slice(0, 8).map(x => {
+          const rr = rollup(x); const nn = norm(rr.tot); const bb = bandOf(nn);
+          return `<tr data-store="${esc(x.id)}">
+            <td><div class="store">${esc(x.name)}${x.mock ? '<span class="mk">mock</span>' : ''}</div><div class="code">${esc(x.id)}</div></td>
+            <td class="region">${esc(x.region)}</td>
+            <td><span class="layer" data-tip="${esc(x.tier)} &middot; ${x.radius} mi radius"><i class="sw ${x.layer.toLowerCase()}"></i>${x.layer}</span></td>
+            <td><div class="score"><div class="track ${bb.cls}"><span style="width:${nn.toFixed(1)}%"></span></div><b class="snum">${f1(nn)}</b></div></td>
+            <td><b class="thrn">${rr.d}</b></td>
+            <td><b class="thrn">${rr.i}</b></td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function mapHtml(s){
+  const RING = 305;
+  const half = RING / 2;
+  const scale = half / s.radius;   // px per mile
+  const dots = s.comps.map(c => {
+    const ang = hashAngle(c.n + "|" + c.d);
+    const rr = Math.min(1, c.d / s.radius) * half;
+    const x = rr * Math.cos(ang), y = rr * Math.sin(ang);
+    const cls = c.c === "i" ? "d-gray" : (c.s >= 20 ? "d-red" : c.s >= 10 ? "d-amber" : "d-gray");
+    const tip = esc(c.n) + " \u00b7 " + c.d.toFixed(3) + " mi \u00b7 " + f2(c.s) + " pts \u00b7 " + (c.c === "d" ? "Direct" : "Indirect");
+    return `<span class="dot ${cls}" style="left:calc(50% + ${x.toFixed(1)}px);top:calc(50% + ${y.toFixed(1)}px)" data-tip="${tip}"></span>`;
+  }).join("");
+
+  return `
+  <div class="map">
+    <div class="ph">
+      <b>Map snapshot placeholder</b>
+      <span>No external map API is called. The dashed ring is the real ${s.radius} mi monitoring radius;<br>marker distance is real, bearing is schematic.</span>
+    </div>
+    <div class="ring"></div>
+    ${dots}
+    <span class="self"></span>
+    <span class="selflabel">${esc(s.own.name)}</span>
+    <div class="maplegend">
+      <span><i style="background:#E5484D"></i>Direct &middot; high</span>
+      <span><i style="background:#F5A623"></i>Direct &middot; medium</span>
+      <span><i style="background:#999999"></i>Indirect</span>
+      <span><i style="background:#000000"></i>Own store</span>
+    </div>
+    <div class="mapscale">
+      <div class="bar" style="width:${scale.toFixed(1)}px"></div>
+      <div class="cap">1 mi</div>
+    </div>
+  </div>`;
+}
+
+function wireDetail(){
+  const app = document.getElementById("app");
+  const s = state.stores.find(x => x.id === state.storeId);
+  if (!s) return;
+
+  app.querySelectorAll("tbody tr[data-store]").forEach(tr => {
+    tr.addEventListener("click", () => { location.hash = "#/store/" + tr.dataset.store; });
+  });
+
+  const seg = document.getElementById("compSeg");
+  if (seg) seg.querySelectorAll("button[data-f]").forEach(btn => {
+    btn.addEventListener("click", () => { state.compFilter = btn.dataset.f; render(); });
+  });
+
+  app.querySelectorAll('[data-act="cat"]').forEach(sel => {
+    sel.addEventListener("change", e => {
+      s.comps[+e.target.dataset.idx].c = e.target.value;
+      render();
+    });
+  });
+
+  app.querySelectorAll('[data-act="del"]').forEach(btn => {
+    btn.addEventListener("click", e => {
+      s.comps.splice(+e.currentTarget.dataset.idx, 1);
+      render();
+    });
+  });
+}
+
+/* ============================================================
+   VIEW — SCORING RULES
+   ============================================================ */
+function viewRules(){
+  const tierRows = META.tiers.map(t => `
+    <tr>
+      <td><span class="layer"><i class="sw ${t.layer.toLowerCase()}"></i>${t.layer}</span></td>
+      <td>${esc(t.tier)}</td>
+      <td class="m">${t.radius} mi</td>
+    </tr>`).join("");
+
+  const bandRows = META.bands.map(b => `
+    <div class="bandrow ${b.name === "Severe" ? "t-sev" : b.name === "High" ? "t-high" : b.name === "Moderate" ? "t-mod" : "t-low"}">
+      <span class="sw"></span>
+      <span class="bn">${b.name}</span>
+      <span class="br">${b.min}&ndash;${b.max}</span>
+      <span class="bd">${b.name === "Severe" ? "Immediate review" : b.name === "High" ? "Priority watch" : b.name === "Moderate" ? "Monitor" : "Routine"}</span>
+    </div>`).join("");
+
+  return `
+  <header class="page">
+    <h1>Scoring Rules</h1>
+    <p class="sub">How every number in this monitor is produced</p>
+  </header>
+
+  <div class="rulesgrid">
+    <div class="card">
+      <h3>Competitor score</h3>
+      <div class="formula">influence_score = rating &times; ln(1 + review_count) &times; max(0, 1 &minus; distance &divide; radius)</div>
+      <p>This is the pipeline's own <code>influence_score</code>, taken verbatim from the workbook. The browser applies <b>no second formula</b> to it.</p>
+      <p>Three inputs, all from the competitor row: <code>rating</code>, <code>review_count</code> (compressed by <code>ln(1+n)</code> so a 5,000-review chain does not swamp a 50-review shop), and <code>distance_mi</code> divided by the store's own <code>radius_mi</code>.</p>
+      <p>The distance term reaches zero exactly at the monitoring radius, so a competitor outside the ring contributes nothing.</p>
+    </div>
+
+    <div class="card">
+      <h3>Store score &rarr; 0&ndash;100</h3>
+      <div class="formula">store_raw = &Sigma;(direct scores) + ${INDIRECT_W} &times; &Sigma;(indirect scores)</div>
+      <div class="formula">normalized = min(100, store_raw &divide; ${STORE_REF} &times; 100)</div>
+      <p>The raw store score is the workbook's <code>total_competitive_pressure_score</code>. Indirect competitors carry half weight &mdash; the pipeline's own convention.</p>
+      <p><b>The ${STORE_REF} base is fixed, not per-batch.</b> A store scoring 200 today scores 200 next month, so scores stay comparable across scans. A min&ndash;max rescale would silently re-rank history.</p>
+      <p>The raw value is never discarded: it appears under the hero figure on every store page.</p>
+    </div>
+  </div>
+
+  <div class="rulesgrid">
+    <div class="card">
+      <h3>Score bands</h3>
+      ${bandRows}
+      <p style="margin-top:14px">Bands are applied to the <b>normalized</b> 0&ndash;100 score. Severe and High share the red token; the band name is always printed beside the figure, so the two are never confused.</p>
+    </div>
+
+    <div class="card">
+      <h3>Layer &amp; monitoring radius</h3>
+      <table class="rtable">
+        <thead><tr><th>Layer</th><th>Density tier</th><th>Radius</th></tr></thead>
+        <tbody>${tierRows}</tbody>
+      </table>
+      <p style="margin-top:14px">The radius is <b>read from the workbook's <code>radius_mi</code></b>, which the pipeline derives from the store's census-tract density. The layer code (L1&ndash;L5) is only a visual label for that tier &mdash; it never overrides the radius.</p>
+    </div>
+  </div>
+
+  <div class="rulesgrid">
+    <div class="card">
+      <h3>Direct vs indirect</h3>
+      <div class="defrow">
+        <div class="dt">Direct</div>
+        <div class="dd">A tea-house competitor &mdash; the store's own category. Counted at full weight. Encoded with a <b>solid</b> marker and a red dot in the category control.</div>
+      </div>
+      <div class="defrow">
+        <div class="dt">Indirect</div>
+        <div class="dd">An adjacent category (coffee, cafe, bakery) competing for the same occasion. Counted at <b>${INDIRECT_W}&times;</b> weight. Encoded with a <b>hollow / grey</b> marker and an amber dot.</div>
+      </div>
+      <div class="defrow">
+        <div class="dt">Threats</div>
+        <div class="dd">Direct competitors whose <code>influence_score</code> is <b>&ge; ${THREAT_MIN}</b>. A count, not a judgement &mdash; rendered without colour.</div>
+      </div>
+      <div class="defrow">
+        <div class="dt">Trend</div>
+        <div class="dd">Change in normalized score since the previous scan. Requires a prior snapshot; a single-scan dataset renders an em dash.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Data source &amp; provenance</h3>
+      <div class="defrow">
+        <div class="dt">Workbook</div>
+        <div class="dd"><span class="mono">${esc(META.source)}</span></div>
+      </div>
+      <div class="defrow">
+        <div class="dt">Scan date</div>
+        <div class="dd">${META.scanDate ? `<span class="mono">${esc(META.scanDate)}</span>` : `<span class="mono">&mdash;</span> not recorded in the workbook`}</div>
+      </div>
+      <div class="defrow">
+        <div class="dt">Stores</div>
+        <div class="dd"><span class="mono">${META.realStores}</span> &mdash; verbatim pipeline output, ${META.realCompetitorRows} competitor rows</div>
+      </div>
+      ${HAS_MOCK ? `<div class="defrow">
+        <div class="dt">Mock stores</div>
+        <div class="dd"><span class="mono">${META.mockStores}</span> &mdash; generated to exercise the ${META.totalStores}-row layout, tagged <span class="mono">mock</span> throughout</div>
+      </div>` : ""}
+      <div class="defrow">
+        <div class="dt">Upstream</div>
+        <div class="dd">Google Places (New) &middot; US Census ACS 5-year &middot; geocoding</div>
+      </div>
+      <div class="defrow">
+        <div class="dt">Map</div>
+        <div class="dd">Placeholder only &mdash; no map API is called. The ring geometry is real; the base image is not.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h3>What this page does not do</h3>
+    <p>Editing a competitor's category or removing a row changes <b>this page's state only</b>. Nothing is written back to the workbook, and a reload restores the original data. This is a review surface, not a data editor.</p>
+    ${HAS_MOCK ? `<p>Mock stores are clearly tagged wherever they appear. They exist so the ${META.totalStores}-row layout can be judged before the full pipeline run lands &mdash; they are not findings.</p>` : `<p>Every store in this build is real pipeline output &mdash; there is no mock data to discount.</p>`}
+  </div>`;
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+window.addEventListener("hashchange", render);
+if (!location.hash) location.hash = "#/overview";
+render();
+</script>
+</body>
+</html>
